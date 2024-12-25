@@ -31,10 +31,16 @@ class MainUpperMuscles(str, Enum):
 
 
 class MainLowerMuscles(str, Enum):
+    LOWER_BACK = "Lower back"
     QUADRICEPS = "Quadriceps"
     HAMSTRINGS = "Hamstrings"
     CALVES = "Calves"
     GLUTES = "Glutes"
+
+
+class MainCoreMuscles(str, Enum):
+    ABS = "Abs"
+    OBLIQUES = "Obligues"
 
 
 class ExerciseCreate(BaseModel):
