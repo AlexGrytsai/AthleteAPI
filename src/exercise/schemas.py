@@ -30,6 +30,13 @@ class MainUpperMuscles(str, Enum):
     LATS = "Lats"
 
 
+class MainLowerMuscles(str, Enum):
+    QUADRICEPS = "Quadriceps"
+    HAMSTRINGS = "Hamstrings"
+    CALVES = "Calves"
+    GLUTES = "Glutes"
+
+
 class ExerciseCreate(BaseModel):
     name: Annotated[str, MaxLen(100), MinLen(5)]
     body_part: BodyPart
