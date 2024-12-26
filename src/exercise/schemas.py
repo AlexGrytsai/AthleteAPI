@@ -46,8 +46,8 @@ class MainCoreMuscles(str, Enum):
 class ExerciseCreate(BaseModel):
     name: Annotated[str, MaxLen(100), MinLen(5)]
     body_part: BodyPart
-    target_muscles: Annotated[str, MaxLen(100), MinLen(5)]
-    additional_muscle: Optional[Annotated[str, MaxLen(100), MinLen(5)]] = None
+    target_muscles: Annotated[str, MaxLen(50), MinLen(5)]
+    additional_muscle: Optional[Annotated[str, MaxLen(50), MinLen(5)]] = None
     description: Optional[Annotated[str, MaxLen(1000), MinLen(30)]] = (
         "No description provided"
     )
