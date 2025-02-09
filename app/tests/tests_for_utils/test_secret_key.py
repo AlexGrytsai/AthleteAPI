@@ -16,7 +16,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
         self.assertIsNotNone(self.secret.client)
         self.mock_client.assert_not_called()
 
-    @patch.dict(os.environ, {"GOOGLE_PROJECT_ID": "test-project"})
+    @patch.dict(os.environ, {"GOOGLE_PROJECT_ID": "test"})
     def test_get_secret_key_success(self):
         mock_secret_value = MagicMock()
         mock_secret_value.payload.data.decode.return_value = "my-secret-value"
@@ -26,7 +26,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
         self.assertEqual(secret, "my-secret-value")
         self.mock_client.access_secret_version.assert_called_once_with(
             request={
-                "name": "projects/test-project/secrets/my-secret/versions/latest"
+                "name": "projects/test/secrets/my-secret/versions/latest"
             }
         )
 
