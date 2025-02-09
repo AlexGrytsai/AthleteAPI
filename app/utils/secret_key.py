@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 
 from typing import Union, TypeAlias, Optional
 
+from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
+from google.cloud import secretmanager
+
 DefaultValueType: TypeAlias = Union[str, int, None]
 
 
@@ -32,6 +35,14 @@ class SecretKeyBase(ABC):
 
 
 class SecretKeyGoogleCloud(SecretKeyBase):
+    def __init__(self):
+        try:
+            self.client = secretmanager.SecretManagerServiceClient()
+        except DefaultCredentialsError as exc:
+            raise GoogleAuthError(
+                f"Failed to create secret manager client: {exc}"
+            )
+
     def get_secret_key(
         self,
         secret_key: str,
