@@ -1,12 +1,11 @@
 import os
 from abc import ABC, abstractmethod
-
 from typing import Union, TypeAlias, Optional
 
+from dotenv import load_dotenv
 from google.api_core.exceptions import NotFound
 from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
 from google.cloud import secretmanager
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -40,7 +39,21 @@ class SecretKeyBase(ABC):
 
 
 class SecretKeyGoogleCloud(SecretKeyBase):
+    """
+    A concrete implementation of SecretKeyBase for Google Cloud Secret Manager.
+
+    This class provides a way to retrieve secret keys from Google Cloud
+    Secret Manager.
+    """
+
     def __init__(self):
+        """
+        Initializes the SecretKeyGoogleCloud instance.
+
+        Creates a SecretManagerServiceClient instance and assigns it
+        to the client attribute.
+        If the default credentials are not found, raises a GoogleAuthError.
+        """
         try:
             self.client = secretmanager.SecretManagerServiceClient()
         except DefaultCredentialsError as exc:
