@@ -4,8 +4,8 @@ from typing import Union, TypeAlias, Optional
 
 from dotenv import load_dotenv
 from google.api_core.exceptions import NotFound
-from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
-from google.cloud import secretmanager
+from google.auth.exceptions import DefaultCredentialsError
+from google.cloud.secretmanager import SecretManagerServiceClient
 
 load_dotenv()
 
@@ -46,20 +46,15 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     Secret Manager.
     """
 
-    def __init__(self):
+    def __init__(self, client: Optional[SecretManagerServiceClient]):
         """
-        Initializes the SecretKeyGoogleCloud instance.
+        Initializes a new instance of the SecretKeyGoogleCloud class.
 
-        Creates a SecretManagerServiceClient instance and assigns it
-        to the client attribute.
-        If the default credentials are not found, raises a GoogleAuthError.
+        Args:
+            client (Optional[SecretManagerServiceClient]): The client used
+            to interact with Google Cloud Secret Manager.
         """
-        try:
-            self.client = secretmanager.SecretManagerServiceClient()
-        except DefaultCredentialsError as exc:
-            raise GoogleAuthError(
-                f"Failed to create secret manager client: {exc}"
-            )
+        self.client = client
 
     def get_secret_key(
         self,
@@ -83,4 +78,13 @@ class SecretKeyGoogleCloud(SecretKeyBase):
             return default_value
 
 
-secret = SecretKeyGoogleCloud()
+def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
+    try:
+        return SecretManagerServiceClient()
+    except DefaultCredentialsError:
+        return None
+
+
+google_client = create_google_secret_client()
+
+secret = SecretKeyGoogleCloud(client=google_client)
