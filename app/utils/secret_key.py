@@ -1,9 +1,14 @@
+import os
 from abc import ABC, abstractmethod
 
 from typing import Union, TypeAlias, Optional
 
+from google.api_core.exceptions import NotFound
 from google.auth.exceptions import DefaultCredentialsError, GoogleAuthError
 from google.cloud import secretmanager
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DefaultValueType: TypeAlias = Union[str, int, None]
 
@@ -48,4 +53,18 @@ class SecretKeyGoogleCloud(SecretKeyBase):
         secret_key: str,
         default_value: Optional[DefaultValueType] = None,
     ) -> DefaultValueType:
-        pass
+        try:
+            google_cloud_project_id = os.getenv("GOOGLE_PROJECT_ID")
+
+            parent = (
+                f"projects/{google_cloud_project_id}/secrets/"
+                f"{secret_key}/versions/latest"
+            )
+
+            secret_value = self.client.access_secret_version(
+                request={"name": parent}
+            )
+            return secret_value.payload.data.decode("UTF-8")
+
+        except (NotFound, AttributeError):
+            return default_value
