@@ -29,3 +29,12 @@ class SecretKeyBase(ABC):
         - DefaultValueType: The retrieved secret key or the default value.
         """
         pass
+
+
+class SecretKeyGoogleCloud(SecretKeyBase):
+    def get_secret_key(
+        self,
+        secret_key: str,
+        default_value: Optional[DefaultValueType] = None,
+    ) -> DefaultValueType:
+        pass
