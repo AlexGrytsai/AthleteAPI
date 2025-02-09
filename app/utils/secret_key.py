@@ -81,3 +81,6 @@ class SecretKeyGoogleCloud(SecretKeyBase):
 
         except (NotFound, AttributeError):
             return default_value
+
+
+secret = SecretKeyGoogleCloud()
