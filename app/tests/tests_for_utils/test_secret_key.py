@@ -25,9 +25,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
         secret = self.secret.get_secret_key("my-secret")
         self.assertEqual(secret, "my-secret-value")
         self.mock_client.access_secret_version.assert_called_once_with(
-            request={
-                "name": "projects/test/secrets/my-secret/versions/latest"
-            }
+            request={"name": "projects/test/secrets/my-secret/versions/latest"}
         )
 
     @patch.dict(os.environ, {"GOOGLE_PROJECT_ID": "test-project"})
