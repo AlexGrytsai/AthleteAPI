@@ -47,13 +47,6 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     """
 
     def __init__(self, client: Optional[SecretManagerServiceClient]):
-        """
-        Initializes a new instance of the SecretKeyGoogleCloud class.
-
-        Args:
-            client (Optional[SecretManagerServiceClient]): The client used
-            to interact with Google Cloud Secret Manager.
-        """
         self.client = client
 
     def get_secret_key(
@@ -61,6 +54,9 @@ class SecretKeyGoogleCloud(SecretKeyBase):
         secret_key: str,
         default_value: Optional[DefaultValueType] = None,
     ) -> DefaultValueType:
+        if not self.client:
+            return default_value
+
         try:
             google_cloud_project_id = os.getenv("GOOGLE_PROJECT_ID")
 
