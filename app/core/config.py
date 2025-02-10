@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import logging.config
 import os
 from abc import ABC, abstractmethod
-from typing import cast, Union, Optional
+from typing import Union, Optional
 
 from dotenv import load_dotenv
 
@@ -10,6 +12,7 @@ from app.utils.secret_key import (
     SecretKeyGoogleCloud,
     SecretKeyBase,
 )
+from app.utils.validators import DataBaseParameterValidator
 
 load_dotenv()
 
@@ -26,9 +29,15 @@ class DBSettingsBase(ABC):
 
 
 class DatabaseSettings(DBSettingsBase):
-    def __init__(self, database_scheme: str, secret: SecretKeyBase) -> None:
+    def __init__(
+        self,
+        database_scheme: str,
+        secret: SecretKeyBase,
+        validator_parameters: DataBaseParameterValidator,
+    ) -> None:
         self.database_scheme = database_scheme
         self.secret = secret
+        self.validator_parameters = validator_parameters
 
     @property
     def url(self) -> str:
@@ -39,32 +48,14 @@ class DatabaseSettings(DBSettingsBase):
             f"/{self._get_db_param('DB_NAME')}"
         )
 
-    def _get_db_param(
-        self, param: str, default: Optional[Union[str, int]] = None
-    ) -> Union[str, int]:
+    def _get_db_param(self, param: str, default: Optional[str] = None) -> str:
         secret_value = self.secret.get_secret_key(
             param, os.getenv(param, default)
         )
 
-        return self._validate_param_type(param=param, value=secret_value)
-
-    @staticmethod
-    def _validate_param_type(
-        param: str,
-        value: Union[str, int, None],
-    ) -> Union[str, int]:
-        if isinstance(value, (str, int)):
-            if param == "DB_HOST" and isinstance(value, int):
-                return value
-            return value
-
-        error_message = (
-            f"Invalid type for database parameter '{param}'. "
-            f"Value '{value}' has type '{type(value).__name__}'. "
-            f"Allowed types: int or str."
+        return self.validator_parameters.validate_parameter_from_secret(
+            param=param, value=secret_value
         )
-        logger.error(error_message)
-        raise TypeError(error_message)
 
 
 class Settings:
@@ -108,5 +99,6 @@ settings = Settings(
     db_settings=DatabaseSettings(
         database_scheme="postgresql+asyncpg",
         secret=SecretKeyGoogleCloud(client=create_google_secret_client()),
+        validator_parameters=DataBaseParameterValidator(),
     )
 )
