@@ -43,6 +43,11 @@ class SecretKeyBase(ABC):
         pass
 
 
+class MockSecretKey(SecretKeyBase):
+    def get_secret_key(self, key: str, default: Optional[str] = None) -> str:
+        return default or "mock_value"
+
+
 class SecretKeyGoogleCloud(SecretKeyBase):
     """
     A concrete implementation of SecretKeyBase for Google Cloud Secret Manager.
@@ -86,8 +91,6 @@ class SecretKeyGoogleCloud(SecretKeyBase):
 
 
 def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
-    from app.core.config import DEVELOP_MODE
-
     try:
         return SecretManagerServiceClient()
     except GoogleAuthError as exc:
@@ -96,9 +99,5 @@ def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
             f"Trigger exception: {exc.__class__.__name__}.\n"
             f"Message: {exc}"
         )
-        if DEVELOP_MODE:
-            logger.warning(error_massage)
-            return None
-
         logger.error(error_massage)
         raise ErrorWithGoogleCloudAuthentication(exc)
