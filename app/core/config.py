@@ -1,9 +1,9 @@
+import logging.config
 import os
 from typing import cast
 
 from dotenv import load_dotenv
 
-import app.core.logger_config  # noqa
 from app.utils.secret_key import (
     create_google_secret_client,
     SecretKeyGoogleCloud,
@@ -48,8 +48,38 @@ class Settings:
         )
 
 
-google_client = create_google_secret_client()
+LOGGING_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "{levelname} [{asctime}] ({filename}) {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "main": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        }
+    },
+}
 
-secret = SecretKeyGoogleCloud(client=google_client)
+logging.config.dictConfig(LOGGING_CONFIG)
 
-settings = Settings(secret_key=secret)
+settings = Settings(
+    secret_key=SecretKeyGoogleCloud(client=create_google_secret_client())
+)
