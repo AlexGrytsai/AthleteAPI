@@ -49,8 +49,10 @@ class DatabaseSettings(DBSettingsBase):
             f"/{self._get_db_param('DB_NAME')}"
         )
 
-    def _get_db_param(self, param: str, default: Optional[str] = None) -> str:
-        secret_value = self.secret.get_secret_key(
+    async def _get_db_param(
+        self, param: str, default: Optional[str] = None
+    ) -> str:
+        secret_value = await self.secret.get_secret_key(
             param, os.getenv(param, default)
         )
 
