@@ -18,7 +18,7 @@ class TestDatabaseSettings(unittest.TestCase):
         )
 
     @patch("app.core.config.SecretKeyBase")
-    @patch("app.core.config.DBParamValidator")
+    @patch("app.core.config.DataBaseParameterValidator")
     def test_url(self, mock_db_param_validator, mock_secret_key_base):
         self.mock_secret.get_secret_key.return_value = "test"
         self.mock_validator.validate_parameter_from_secret.return_value = (
@@ -29,7 +29,7 @@ class TestDatabaseSettings(unittest.TestCase):
         self.assertEqual(self.db_settings.url, expected_url)
 
     @patch("app.core.config.SecretKeyBase")
-    @patch("app.core.config.DBParamValidator")
+    @patch("app.core.config.DataBaseParameterValidator")
     def test_get_db_param(self, mock_db_param_validator, mock_secret_key_base):
         self.mock_secret.get_secret_key.return_value = "test_value"
         self.mock_validator.validate_parameter_from_secret.return_value = (
@@ -49,7 +49,7 @@ class TestDatabaseSettings(unittest.TestCase):
         )
 
     @patch("app.core.config.SecretKeyBase")
-    @patch("app.core.config.DBParamValidator")
+    @patch("app.core.config.DataBaseParameterValidator")
     def test_invalid_param_type(
         self, mock_db_param_validator, mock_secret_key_base
     ):
