@@ -96,6 +96,8 @@ LOGGING_CONFIG = {
 
 logging.config.dictConfig(LOGGING_CONFIG)
 
+secret_provider: SecretKeyBase
+
 if DEVELOP_MODE:
     secret_provider = MockSecretKey()
 else:
