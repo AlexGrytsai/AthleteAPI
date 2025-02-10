@@ -2,40 +2,54 @@ import os
 from typing import cast
 
 from dotenv import load_dotenv
-from pydantic_settings import BaseSettings
 
 import app.core.logger_config  # noqa
-from app.utils.secret_key import secret
+from app.utils.secret_key import (
+    create_google_secret_client,
+    SecretKeyGoogleCloud,
+    SecretKeyBase,
+)
 
 load_dotenv()
 
+DEVELOP_MODE: bool = True
 
-class Settings(BaseSettings):
-    DEVELOP_MODE: bool = True
 
-    DB_HOST: str = cast(
-        str, secret.get_secret_key("DB_HOST", os.getenv("DB_HOST", ""))
-    )
-    DB_PORT: int = cast(
-        int, secret.get_secret_key("DB_PORT", os.getenv("DB_PORT", 5432))
-    )
-    DB_USER: str = cast(
-        str, secret.get_secret_key("DB_USER", os.getenv("DB_USER", ""))
-    )
-    DB_PASS: str = cast(
-        str, secret.get_secret_key("DB_PASS", os.getenv("DB_PASS", ""))
-    )
-    DB_NAME: str = cast(
-        str, secret.get_secret_key("DB_NAME", os.getenv("DB_NAME", ""))
-    )
+class Settings:
+    def __init__(self, secret_key: SecretKeyBase):
+        self.secret = secret_key
 
     @property
     def database_url(self):
+        db_host: str = cast(
+            str,
+            self.secret.get_secret_key("DB_HOST", os.getenv("DB_HOST", "")),
+        )
+        db_port: int = cast(
+            int,
+            self.secret.get_secret_key("DB_PORT", os.getenv("DB_PORT", 5432)),
+        )
+        db_user: str = cast(
+            str,
+            self.secret.get_secret_key("DB_USER", os.getenv("DB_USER", "")),
+        )
+        db_pass: str = cast(
+            str,
+            self.secret.get_secret_key("DB_PASS", os.getenv("DB_PASS", "")),
+        )
+        db_name: str = cast(
+            str,
+            self.secret.get_secret_key("DB_NAME", os.getenv("DB_NAME", "")),
+        )
         return (
             f"postgresql+asyncpg://"
-            f"{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}"
-            f"/{self.DB_NAME}"
+            f"{db_user}:{db_pass}@{db_host}:{db_port}"
+            f"/{db_name}"
         )
 
 
-settings = Settings()
+google_client = create_google_secret_client()
+
+secret = SecretKeyGoogleCloud(client=google_client)
+
+settings = Settings(secret_key=secret)
