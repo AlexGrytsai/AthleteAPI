@@ -11,6 +11,8 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
+    DEVELOP_MODE: bool = True
+
     DB_HOST: str = cast(
         str, secret.get_secret_key("DB_HOST", os.getenv("DB_HOST", ""))
     )
