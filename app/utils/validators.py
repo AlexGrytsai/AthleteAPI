@@ -4,7 +4,7 @@ from typing import Union
 logger = logging.getLogger(__name__)
 
 
-class DBParamValidator:
+class DataBaseParameterValidator:
     @staticmethod
     def validate_parameter_from_secret(
         param: str,
