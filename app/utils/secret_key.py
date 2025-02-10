@@ -44,8 +44,10 @@ class SecretKeyBase(ABC):
 
 
 class MockSecretKey(SecretKeyBase):
-    def get_secret_key(self, key: str, default: Optional[str] = None) -> str:
-        return default or "mock_value"
+    def get_secret_key(
+        self, secret_key: str, default_value: Optional[SecretValueType] = None
+    ) -> SecretValueType:
+        return default_value if default_value is not None else "mock_value"
 
 
 class SecretKeyGoogleCloud(SecretKeyBase):
