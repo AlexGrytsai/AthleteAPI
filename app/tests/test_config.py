@@ -3,13 +3,13 @@ from unittest.mock import patch, MagicMock
 
 from app.core.config import DatabaseSettings
 from app.utils.secret_key import SecretKeyBase
-from app.utils.validators import DBParamValidator
+from app.utils.validators import DataBaseParameterValidator
 
 
 class TestDatabaseSettings(unittest.TestCase):
     def setUp(self):
         self.mock_secret = MagicMock(spec=SecretKeyBase)
-        self.mock_validator = MagicMock(spec=DBParamValidator)
+        self.mock_validator = MagicMock(spec=DataBaseParameterValidator)
 
         self.db_settings = DatabaseSettings(
             database_scheme="postgresql",
