@@ -8,6 +8,8 @@ from google.api_core.exceptions import NotFound
 from google.auth.exceptions import GoogleAuthError
 from google.cloud.secretmanager import SecretManagerServiceClient
 
+from app.core.exceptions import ErrorWithGoogleCloudAuthentication
+
 load_dotenv()
 
 logger = logging.getLogger()
@@ -78,17 +80,19 @@ class SecretKeyGoogleCloud(SecretKeyBase):
 
 
 def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
+    from app.core.config import DEVELOP_MODE
+
     try:
         return SecretManagerServiceClient()
     except GoogleAuthError as exc:
-        logger.warning(
+        error_massage = (
             f"Failed to create Google Secret Manager client."
             f"Trigger exception: {exc.__class__.__name__}.\n"
             f"Message: {exc}"
         )
-        return None
+        if DEVELOP_MODE:
+            logger.warning(error_massage)
+            return None
 
-
-google_client = create_google_secret_client()
-
-secret = SecretKeyGoogleCloud(client=google_client)
+        logger.error(error_massage)
+        raise ErrorWithGoogleCloudAuthentication(exc)
