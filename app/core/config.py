@@ -1,6 +1,6 @@
 import logging.config
 import os
-from typing import cast
+from typing import cast, Union
 
 from dotenv import load_dotenv
 
@@ -12,7 +12,43 @@ from app.utils.secret_key import (
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 DEVELOP_MODE: bool = True
+
+
+class DatabaseSettings:
+    def __init__(self, database_scheme: str, secret: SecretKeyBase) -> None:
+        self.database_scheme = database_scheme
+        self.secret = secret
+
+    @property
+    def url(self) -> str:
+        return (
+            f"{self.database_scheme}://"
+            f"{self._get_db_param('DB_USER')}:{self._get_db_param('DB_PASS')}"
+            f"@{self._get_db_param('DB_HOST')}:{self._get_db_param('DB_PORT')}"
+            f"/{self._get_db_param('DB_NAME')}"
+        )
+
+    def _get_db_param(
+        self, param: str, default: Union[str, int] = ""
+    ) -> Union[str, int]:
+        secret_value = self.secret.get_secret_key(
+            param, os.getenv(param, default)
+        )
+        type_of_secret_value = type(secret_value)
+
+        if not isinstance(secret_value, (str, int)):
+            error_message = (
+                f"A wrong type secret value for Database parameter. "
+                f"Secret '{secret_value}' has type '{type_of_secret_value}'. "
+                f"Permissible types of parameters: int or str"
+            )
+            logger.error(error_message)
+            raise TypeError(error_message)
+
+        return cast(type_of_secret_value, secret_value)
 
 
 class Settings:
