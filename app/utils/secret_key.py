@@ -6,7 +6,7 @@ from typing import Union, TypeAlias, Optional
 from dotenv import load_dotenv
 from google.api_core.exceptions import NotFound
 from google.auth.exceptions import GoogleAuthError
-from google.cloud.secretmanager import SecretManagerServiceClient
+from google.cloud.secretmanager_v1 import SecretManagerServiceAsyncClient
 
 from app.core.exceptions import ErrorWithGoogleCloudAuthentication
 
@@ -25,7 +25,7 @@ class SecretKeyBase(ABC):
     """
 
     @abstractmethod
-    def get_secret_key(
+    async def get_secret_key(
         self, secret_key: str, default_value: Optional[SecretValueType] = None
     ) -> SecretValueType:
         """
@@ -44,7 +44,7 @@ class SecretKeyBase(ABC):
 
 
 class MockSecretKey(SecretKeyBase):
-    def get_secret_key(
+    async def get_secret_key(
         self, secret_key: str, default_value: Optional[SecretValueType] = None
     ) -> SecretValueType:
         return default_value if default_value is not None else "mock_value"
@@ -58,10 +58,10 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     Secret Manager.
     """
 
-    def __init__(self, client: Optional[SecretManagerServiceClient]):
+    def __init__(self, client: Optional[SecretManagerServiceAsyncClient]):
         self.client = client
 
-    def get_secret_key(
+    async def get_secret_key(
         self,
         secret_key: str,
         default_value: Optional[SecretValueType] = None,
@@ -77,7 +77,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
                 f"{secret_key}/versions/latest"
             )
 
-            secret_value = self.client.access_secret_version(
+            secret_value = await self.client.access_secret_version(
                 request={"name": parent}
             )
             return secret_value.payload.data.decode("UTF-8")
@@ -92,9 +92,9 @@ class SecretKeyGoogleCloud(SecretKeyBase):
             return default_value
 
 
-def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
+def create_google_secret_client() -> Optional[SecretManagerServiceAsyncClient]:
     try:
-        return SecretManagerServiceClient()
+        return SecretManagerServiceAsyncClient()
     except GoogleAuthError as exc:
         error_massage = (
             f"Failed to create Google Secret Manager client."
