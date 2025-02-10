@@ -1,13 +1,16 @@
+import logging
 import os
 from abc import ABC, abstractmethod
 from typing import Union, TypeAlias, Optional
 
 from dotenv import load_dotenv
 from google.api_core.exceptions import NotFound
-from google.auth.exceptions import DefaultCredentialsError
+from google.auth.exceptions import GoogleAuthError
 from google.cloud.secretmanager import SecretManagerServiceClient
 
 load_dotenv()
+
+logger = logging.getLogger()
 
 DefaultValueType: TypeAlias = Union[str, int, None]
 
@@ -77,7 +80,12 @@ class SecretKeyGoogleCloud(SecretKeyBase):
 def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
     try:
         return SecretManagerServiceClient()
-    except DefaultCredentialsError:
+    except GoogleAuthError as exc:
+        logger.warning(
+            f"Failed to create Google Secret Manager client."
+            f"Trigger exception: {exc.__class__.__name__}.\n"
+            f"Message: {exc}"
+        )
         return None
 
 
