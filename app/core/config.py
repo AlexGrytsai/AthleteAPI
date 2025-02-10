@@ -19,6 +19,7 @@ DEVELOP_MODE: bool = True
 
 
 class DBSettingsBase(ABC):
+    @property
     @abstractmethod
     def url(self) -> str:
         pass
