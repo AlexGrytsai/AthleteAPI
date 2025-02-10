@@ -75,7 +75,13 @@ class SecretKeyGoogleCloud(SecretKeyBase):
             )
             return secret_value.payload.data.decode("UTF-8")
 
-        except (NotFound, AttributeError):
+        except (NotFound, AttributeError) as exc:
+            error_massage = (
+                f"Failed to get secret from Google Cloud Secret. "
+                f"Trigger exception: {exc.__class__.__name__}.\n"
+                f"Message: {exc}"
+            )
+            logger.warning(error_massage)
             return default_value
 
 
