@@ -14,7 +14,7 @@ load_dotenv()
 
 logger = logging.getLogger()
 
-DefaultValueType: TypeAlias = Union[str, int, None]
+SecretValueType: TypeAlias = Union[str, int, None]
 
 
 class SecretKeyBase(ABC):
@@ -26,8 +26,8 @@ class SecretKeyBase(ABC):
 
     @abstractmethod
     def get_secret_key(
-        self, secret_key: str, default_value: Optional[DefaultValueType] = None
-    ) -> DefaultValueType:
+        self, secret_key: str, default_value: Optional[SecretValueType] = None
+    ) -> SecretValueType:
         """
         Retrieves a secret key.
 
@@ -57,8 +57,8 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     def get_secret_key(
         self,
         secret_key: str,
-        default_value: Optional[DefaultValueType] = None,
-    ) -> DefaultValueType:
+        default_value: Optional[SecretValueType] = None,
+    ) -> SecretValueType:
         if not self.client:
             return default_value
 
