@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging.config
 import os
 from abc import ABC, abstractmethod
-from typing import Union, Optional
+from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -11,6 +11,7 @@ from app.utils.secret_key import (
     create_google_secret_client,
     SecretKeyGoogleCloud,
     SecretKeyBase,
+    MockSecretKey,
 )
 from app.utils.validators import DataBaseParameterValidator
 
@@ -18,7 +19,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-DEVELOP_MODE: bool = True
+DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "True"
 
 
 class DBSettingsBase(ABC):
@@ -95,10 +96,17 @@ LOGGING_CONFIG = {
 
 logging.config.dictConfig(LOGGING_CONFIG)
 
+if DEVELOP_MODE:
+    secret_provider = MockSecretKey()
+else:
+    secret_provider = SecretKeyGoogleCloud(
+        client=create_google_secret_client()
+    )
+
 settings = Settings(
     db_settings=DatabaseSettings(
         database_scheme="postgresql+asyncpg",
-        secret=SecretKeyGoogleCloud(client=create_google_secret_client()),
+        secret=secret_provider,
         validator_parameters=DataBaseParameterValidator(),
     )
 )
