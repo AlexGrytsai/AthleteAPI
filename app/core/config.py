@@ -20,7 +20,6 @@ DEVELOP_MODE: bool = True
 
 class DBSettingsBase(ABC):
     @abstractmethod
-    @property
     def url(self) -> str:
         pass
 
@@ -68,36 +67,8 @@ class DatabaseSettings(DBSettingsBase):
 
 
 class Settings:
-    def __init__(self, secret_key: SecretKeyBase):
-        self.secret = secret_key
-
-    @property
-    def database_url(self):
-        db_host: str = cast(
-            str,
-            self.secret.get_secret_key("DB_HOST", os.getenv("DB_HOST", "")),
-        )
-        db_port: int = cast(
-            int,
-            self.secret.get_secret_key("DB_PORT", os.getenv("DB_PORT", 5432)),
-        )
-        db_user: str = cast(
-            str,
-            self.secret.get_secret_key("DB_USER", os.getenv("DB_USER", "")),
-        )
-        db_pass: str = cast(
-            str,
-            self.secret.get_secret_key("DB_PASS", os.getenv("DB_PASS", "")),
-        )
-        db_name: str = cast(
-            str,
-            self.secret.get_secret_key("DB_NAME", os.getenv("DB_NAME", "")),
-        )
-        return (
-            f"postgresql+asyncpg://"
-            f"{db_user}:{db_pass}@{db_host}:{db_port}"
-            f"/{db_name}"
-        )
+    def __init__(self, db_settings: DBSettingsBase):
+        self.db_url = db_settings.url
 
 
 LOGGING_CONFIG = {
@@ -133,5 +104,8 @@ LOGGING_CONFIG = {
 logging.config.dictConfig(LOGGING_CONFIG)
 
 settings = Settings(
-    secret_key=SecretKeyGoogleCloud(client=create_google_secret_client())
+    db_settings=DatabaseSettings(
+        database_scheme="postgresql+asyncpg",
+        secret=SecretKeyGoogleCloud(client=create_google_secret_client()),
+    )
 )
