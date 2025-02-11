@@ -27,13 +27,7 @@ class DoesNotHavePermissionForGoogleCloudSecret(Exception):
 
 
 class InvalidUsernameOrPasswordForDatabase(Exception):
-    def __init__(self, exception: InvalidAuthorizationSpecificationError):
-        message = (
-            f"Was provided invalid username or password "
-            f"for connection to Database. Trigger exception: "
-            f"{exception.__class__.__name__}.\n"
-            f"Message: {exception}"
-        )
+    def __init__(self, message: str):
         super().__init__(message)
 
 
