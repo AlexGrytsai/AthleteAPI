@@ -38,10 +38,5 @@ class InvalidUsernameOrPasswordForDatabase(Exception):
 
 
 class WrongDatabaseName(Exception):
-    def __init__(self, exception: InvalidCatalogNameError):
-        message = (
-            f"Wrong database name. Trigger exception: "
-            f"{exception.__class__.__name__}.\n"
-            f"Message: {exception}"
-        )
+    def __init__(self, message: str):
         super().__init__(message)
