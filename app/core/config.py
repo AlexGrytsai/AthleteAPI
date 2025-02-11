@@ -44,11 +44,11 @@ class DatabaseSettings(DatabaseSettingsBase):
     @property
     async def url(self) -> str:
         db_user, db_pass, db_host, db_port, db_name = await asyncio.gather(
-            self._get_db_param("DB_USER", default=os.getenv("DB_USER")),
-            self._get_db_param("DB_PASS", default=os.getenv("DB_PASS")),
-            self._get_db_param("DB_HOST", default=os.getenv("DB_HOST")),
-            self._get_db_param("DB_PORT", default=os.getenv("DB_PORT")),
-            self._get_db_param("DB_NAME", default=os.getenv("DB_NAME")),
+            self._get_db_param("DB_USER", default=os.getenv("DB_USER", "")),
+            self._get_db_param("DB_PASS", default=os.getenv("DB_PASS", "")),
+            self._get_db_param("DB_HOST", default=os.getenv("DB_HOST", "")),
+            self._get_db_param("DB_PORT", default=os.getenv("DB_PORT", "")),
+            self._get_db_param("DB_NAME", default=os.getenv("DB_NAME", "")),
         )
 
         return (
@@ -56,9 +56,7 @@ class DatabaseSettings(DatabaseSettingsBase):
             f"{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
         )
 
-    async def _get_db_param(
-        self, param: str, default: Optional[str] = None
-    ) -> str:
+    async def _get_db_param(self, param: str, default: str) -> str:
         secret_value = await self.secret.get_secret_key(param, default)
 
         return self.validator_parameters.validate_parameter_from_secret(
