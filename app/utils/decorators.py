@@ -7,9 +7,9 @@ logger = logging.getLogger(__name__)
 
 def async_timer_of_execution(func: Callable) -> Callable:
     async def wrapper(*args, **kwargs):
-        start_time = time.process_time()
+        start_time = time.perf_counter()
         result = await func(*args, **kwargs)
-        end_time = time.process_time()
+        end_time = time.perf_counter()
 
         logger.info(
             f"Execution time for '{func.__name__}': {end_time - start_time}"
