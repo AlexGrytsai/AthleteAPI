@@ -28,17 +28,14 @@ class SecretKeyBase(ABC):
     """
 
     @abstractmethod
-    async def get_secret_key(
-        self, secret_key: str, default_value: Optional[str] = None
-    ) -> str:
+    async def get_secret_key(self, secret_key: str, default_value: str) -> str:
         """
         Retrieves a secret key.
 
         Args:
         - secret_key (str): The key to retrieve.
-        - default_value (str, optional):
-                            The default value to return if the key is not
-                            found. Defaults to None.
+        - default_value (str): The default value to return if the key is not
+                               found. Defaults to None.
 
         Returns:
         - str: The retrieved secret key or the default value.
@@ -48,9 +45,9 @@ class SecretKeyBase(ABC):
 
 class MockSecretKey(SecretKeyBase):
     async def get_secret_key(
-        self, secret_key: str, default_value: Optional[str] = None
+        self, secret_key: str, default_value: str = "mock_value"
     ) -> str:
-        return default_value if default_value is not None else "mock_value"
+        return default_value
 
 
 class SecretKeyGoogleCloud(SecretKeyBase):
@@ -67,7 +64,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     async def get_secret_key(
         self,
         secret_key: str,
-        default_value: Optional[str] = None,
+        default_value: str,
     ) -> str:
         if not self.client:
             return default_value
