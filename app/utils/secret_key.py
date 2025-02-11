@@ -1,12 +1,10 @@
-import asyncio
 import logging
 import os
 from abc import ABC, abstractmethod
-from asyncio import EventLoop
-from typing import Union, TypeAlias, Optional
+from typing import Optional
 
 from dotenv import load_dotenv
-from google.api_core.exceptions import NotFound, PermissionDenied, Forbidden
+from google.api_core.exceptions import NotFound, Forbidden
 from google.auth.exceptions import GoogleAuthError
 from google.cloud.secretmanager_v1 import SecretManagerServiceAsyncClient
 
