@@ -1,4 +1,7 @@
-from asyncpg import InvalidAuthorizationSpecificationError
+from asyncpg import (
+    InvalidAuthorizationSpecificationError,
+    InvalidCatalogNameError,
+)
 from google.api_core.exceptions import Forbidden
 from google.auth.exceptions import GoogleAuthError
 
@@ -28,6 +31,16 @@ class InvalidUsernameOrPasswordForDatabase(Exception):
         message = (
             f"Was provided invalid username or password "
             f"for connection to Database. Trigger exception: "
+            f"{exception.__class__.__name__}.\n"
+            f"Message: {exception}"
+        )
+        super().__init__(message)
+
+
+class WrongDatabaseName(Exception):
+    def __init__(self, exception: InvalidCatalogNameError):
+        message = (
+            f"Wrong database name. Trigger exception: "
             f"{exception.__class__.__name__}.\n"
             f"Message: {exception}"
         )
