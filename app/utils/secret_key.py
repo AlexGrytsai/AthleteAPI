@@ -1,20 +1,23 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Union, TypeAlias, Optional
+from typing import Optional
 
 from dotenv import load_dotenv
-from google.api_core.exceptions import NotFound
+from google.api_core.exceptions import NotFound, Forbidden
 from google.auth.exceptions import GoogleAuthError
-from google.cloud.secretmanager import SecretManagerServiceClient
+from google.cloud.secretmanager_v1 import (
+    SecretManagerServiceClient,
+)
 
-from app.core.exceptions import ErrorWithGoogleCloudAuthentication
+from app.core.exceptions import (
+    ErrorWithGoogleCloudAuthentication,
+    DoesNotHavePermissionForGoogleCloudSecret,
+)
 
 load_dotenv()
 
 logger = logging.getLogger()
-
-SecretValueType: TypeAlias = Union[str, int, None]
 
 
 class SecretKeyBase(ABC):
@@ -25,29 +28,26 @@ class SecretKeyBase(ABC):
     """
 
     @abstractmethod
-    def get_secret_key(
-        self, secret_key: str, default_value: Optional[SecretValueType] = None
-    ) -> SecretValueType:
+    async def get_secret_key(self, secret_key: str, default_value: str) -> str:
         """
         Retrieves a secret key.
 
         Args:
         - secret_key (str): The key to retrieve.
-        - default_value (DefaultValueType, optional):
-                            The default value to return if the key is not
-                            found. Defaults to None.
+        - default_value (str): The default value to return if the key is not
+                               found. Defaults to None.
 
         Returns:
-        - DefaultValueType: The retrieved secret key or the default value.
+        - str: The retrieved secret key or the default value.
         """
         pass
 
 
 class MockSecretKey(SecretKeyBase):
-    def get_secret_key(
-        self, secret_key: str, default_value: Optional[SecretValueType] = None
-    ) -> SecretValueType:
-        return default_value if default_value is not None else "mock_value"
+    async def get_secret_key(
+        self, secret_key: str, default_value: str = "mock_value"
+    ) -> str:
+        return default_value
 
 
 class SecretKeyGoogleCloud(SecretKeyBase):
@@ -61,11 +61,11 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     def __init__(self, client: Optional[SecretManagerServiceClient]):
         self.client = client
 
-    def get_secret_key(
+    async def get_secret_key(
         self,
         secret_key: str,
-        default_value: Optional[SecretValueType] = None,
-    ) -> SecretValueType:
+        default_value: str,
+    ) -> str:
         if not self.client:
             return default_value
 
@@ -80,7 +80,15 @@ class SecretKeyGoogleCloud(SecretKeyBase):
             secret_value = self.client.access_secret_version(
                 request={"name": parent}
             )
-            return secret_value.payload.data.decode("UTF-8")
+            return str(secret_value.payload.data.decode("UTF-8"))
+        except Forbidden as exc:
+            error_massage = (
+                f"Problem with permission for Google Cloud Secret. "
+                f"Trigger exception: {exc.__class__.__name__}.\n"
+                f"Message: {exc}"
+            )
+            logger.error(error_massage)
+            raise DoesNotHavePermissionForGoogleCloudSecret(exc)
 
         except (NotFound, AttributeError) as exc:
             error_massage = (
@@ -94,6 +102,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
 
 def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
     try:
+        # return SecretManagerServiceAsyncClient()
         return SecretManagerServiceClient()
     except GoogleAuthError as exc:
         error_massage = (

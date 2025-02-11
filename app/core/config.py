@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging.config
 import os
 from abc import ABC, abstractmethod
@@ -22,14 +23,14 @@ logger = logging.getLogger(__name__)
 DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "True"
 
 
-class DBSettingsBase(ABC):
+class DatabaseSettingsBase(ABC):
     @property
     @abstractmethod
-    def url(self) -> str:
+    async def url(self) -> str:
         pass
 
 
-class DatabaseSettings(DBSettingsBase):
+class DatabaseSettings(DatabaseSettingsBase):
     def __init__(
         self,
         database_scheme: str,
@@ -41,18 +42,22 @@ class DatabaseSettings(DBSettingsBase):
         self.validator_parameters = validator_parameters
 
     @property
-    def url(self) -> str:
-        return (
-            f"{self.database_scheme}://"
-            f"{self._get_db_param('DB_USER')}:{self._get_db_param('DB_PASS')}"
-            f"@{self._get_db_param('DB_HOST')}:{self._get_db_param('DB_PORT')}"
-            f"/{self._get_db_param('DB_NAME')}"
+    async def url(self) -> str:
+        db_user, db_pass, db_host, db_port, db_name = await asyncio.gather(
+            self._get_db_param("DB_USER", default=os.getenv("DB_USER", "")),
+            self._get_db_param("DB_PASS", default=os.getenv("DB_PASS", "")),
+            self._get_db_param("DB_HOST", default=os.getenv("DB_HOST", "")),
+            self._get_db_param("DB_PORT", default=os.getenv("DB_PORT", "")),
+            self._get_db_param("DB_NAME", default=os.getenv("DB_NAME", "")),
         )
 
-    def _get_db_param(self, param: str, default: Optional[str] = None) -> str:
-        secret_value = self.secret.get_secret_key(
-            param, os.getenv(param, default)
+        return (
+            f"{self.database_scheme}://"
+            f"{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
         )
+
+    async def _get_db_param(self, param: str, default: str) -> str:
+        secret_value = await self.secret.get_secret_key(param, default)
 
         return self.validator_parameters.validate_parameter_from_secret(
             param=param, value=secret_value
@@ -60,8 +65,8 @@ class DatabaseSettings(DBSettingsBase):
 
 
 class Settings:
-    def __init__(self, db_settings: DBSettingsBase):
-        self.db_url = db_settings.url
+    def __init__(self, db_settings: DatabaseSettingsBase) -> None:
+        self.db_url = asyncio.run(db_settings.url)
 
 
 LOGGING_CONFIG = {

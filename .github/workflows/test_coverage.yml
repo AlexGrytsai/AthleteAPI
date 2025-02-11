@@ -28,5 +28,5 @@ jobs:
           poetry install
       - name: Run tests with coverage
         run: |
-          poetry run coverage run --source=app -m unittest discover
+          poetry run bash -c "DEVELOP_MODE=True coverage run --source=app -m unittest discover"
           poetry run coverage report --fail-under=70

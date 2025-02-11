@@ -8,7 +8,7 @@ class DataBaseParameterValidator:
     @staticmethod
     def validate_parameter_from_secret(
         param: str,
-        value: Union[str, int, None],
+        value: str,
     ) -> str:
         if isinstance(value, str):
             return value
