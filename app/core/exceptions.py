@@ -16,3 +16,8 @@ class InvalidUsernameOrPasswordForDatabase(Exception):
 class WrongDatabaseName(Exception):
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class DatabaseConnectionErrorWrongHostOrPort(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
