@@ -12,14 +12,12 @@ from google.cloud.secretmanager_v1 import SecretManagerServiceAsyncClient
 
 from app.core.exceptions import (
     ErrorWithGoogleCloudAuthentication,
-    DoesNotHavePermission,
+    DoesNotHavePermissionForGoogleCloudSecret,
 )
 
 load_dotenv()
 
 logger = logging.getLogger()
-
-SecretValueType: TypeAlias = Union[str, int, None]
 
 
 class SecretKeyBase(ABC):
@@ -31,27 +29,27 @@ class SecretKeyBase(ABC):
 
     @abstractmethod
     async def get_secret_key(
-        self, secret_key: str, default_value: Optional[SecretValueType] = None
-    ) -> SecretValueType:
+        self, secret_key: str, default_value: Optional[str] = None
+    ) -> str:
         """
         Retrieves a secret key.
 
         Args:
         - secret_key (str): The key to retrieve.
-        - default_value (DefaultValueType, optional):
+        - default_value (str, optional):
                             The default value to return if the key is not
                             found. Defaults to None.
 
         Returns:
-        - DefaultValueType: The retrieved secret key or the default value.
+        - str: The retrieved secret key or the default value.
         """
         pass
 
 
 class MockSecretKey(SecretKeyBase):
     async def get_secret_key(
-        self, secret_key: str, default_value: Optional[SecretValueType] = None
-    ) -> SecretValueType:
+        self, secret_key: str, default_value: Optional[str] = None
+    ) -> str:
         return default_value if default_value is not None else "mock_value"
 
 
@@ -69,8 +67,8 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     async def get_secret_key(
         self,
         secret_key: str,
-        default_value: Optional[SecretValueType] = None,
-    ) -> SecretValueType:
+        default_value: Optional[str] = None,
+    ) -> str:
         if not self.client:
             return default_value
 
@@ -85,7 +83,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
             secret_value = await self.client.access_secret_version(
                 request={"name": parent}
             )
-            return secret_value.payload.data.decode("UTF-8")
+            return str(secret_value.payload.data.decode("UTF-8"))
         except Forbidden as exc:
             error_massage = (
                 f"Problem with permission for Google Cloud Secret. "
@@ -93,7 +91,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
                 f"Message: {exc}"
             )
             logger.error(error_massage)
-            raise DoesNotHavePermission(exc)
+            raise DoesNotHavePermissionForGoogleCloudSecret(exc)
 
         except (NotFound, AttributeError) as exc:
             error_massage = (
