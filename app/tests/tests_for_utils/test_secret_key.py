@@ -17,7 +17,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
         self.mock_client.assert_not_called()
 
     @patch.dict(os.environ, {"GOOGLE_PROJECT_ID": "test"})
-    def test_get_secret_key_success(self):
+    async def test_get_secret_key_success(self):
         mock_secret_value = MagicMock()
         mock_secret_value.payload.data.decode.return_value = "my-secret-value"
         self.mock_client.access_secret_version.return_value = mock_secret_value
@@ -29,7 +29,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
         )
 
     @patch.dict(os.environ, {"GOOGLE_PROJECT_ID": "test-project"})
-    def test_get_secret_key_not_found(self):
+    async def test_get_secret_key_not_found(self):
         self.mock_client.access_secret_version.side_effect = NotFound(
             "Secret not found"
         )
@@ -39,7 +39,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
         )
         self.assertEqual(secret, "default")
 
-    def test_get_secret_key_no_project_id(self):
+    async def test_get_secret_key_no_project_id(self):
         self.mock_client.access_secret_version.side_effect = AttributeError(
             "Project ID not found"
         )
