@@ -12,7 +12,8 @@ def async_timer_of_execution(func: Callable) -> Callable:
         end_time = time.perf_counter()
 
         logger.info(
-            f"Execution time for '{func.__name__}': {end_time - start_time}"
+            f"Execution time for '{func.__name__}': "
+            f"{end_time - start_time:.4f} seconds"
         )
         return result
 
