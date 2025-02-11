@@ -12,7 +12,7 @@ class ErrorWithGoogleCloudAuthentication(Exception):
         super().__init__(message)
 
 
-class DoesNotHavePermission(Exception):
+class DoesNotHavePermissionForGoogleCloudSecret(Exception):
     def __init__(self, exception: Forbidden):
         message = (
             f"Problem with permission for Google Cloud Secret. "
