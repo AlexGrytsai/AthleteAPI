@@ -6,7 +6,9 @@ from typing import Optional
 from dotenv import load_dotenv
 from google.api_core.exceptions import NotFound, Forbidden
 from google.auth.exceptions import GoogleAuthError
-from google.cloud.secretmanager_v1 import SecretManagerServiceAsyncClient
+from google.cloud.secretmanager_v1 import (
+    SecretManagerServiceClient,
+)
 
 from app.core.exceptions import (
     ErrorWithGoogleCloudAuthentication,
@@ -59,7 +61,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     Secret Manager.
     """
 
-    def __init__(self, client: Optional[SecretManagerServiceAsyncClient]):
+    def __init__(self, client: Optional[SecretManagerServiceClient]):
         self.client = client
 
     async def get_secret_key(
@@ -78,7 +80,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
                 f"{secret_key}/versions/latest"
             )
 
-            secret_value = await self.client.access_secret_version(
+            secret_value = self.client.access_secret_version(
                 request={"name": parent}
             )
             return str(secret_value.payload.data.decode("UTF-8"))
@@ -101,9 +103,10 @@ class SecretKeyGoogleCloud(SecretKeyBase):
             return default_value
 
 
-def create_google_secret_client() -> Optional[SecretManagerServiceAsyncClient]:
+def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
     try:
-        return SecretManagerServiceAsyncClient()
+        # return SecretManagerServiceAsyncClient()
+        return SecretManagerServiceClient()
     except GoogleAuthError as exc:
         error_massage = (
             f"Failed to create Google Secret Manager client."
