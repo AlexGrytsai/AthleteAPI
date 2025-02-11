@@ -88,7 +88,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
                 f"Message: {exc}"
             )
             logger.error(error_massage)
-            raise DoesNotHavePermissionForGoogleCloudSecret(exc)
+            raise DoesNotHavePermissionForGoogleCloudSecret(error_massage)
 
         except (NotFound, AttributeError) as exc:
             error_massage = (
