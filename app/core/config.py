@@ -20,7 +20,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "False"
+DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "True"
 
 
 class DatabaseSettingsBase(ABC):
