@@ -28,7 +28,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
                 mock_secret_value
             )
 
-            secret = await self.secret.get_secret_key("my-secret")
+            secret = await self.secret.get_secret_key("my-secret", "default")
             self.assertEqual(secret, "my-secret-value")
             self.mock_client.access_secret_version.assert_called_once_with(
                 request={
