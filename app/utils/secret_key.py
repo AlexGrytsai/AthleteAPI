@@ -111,4 +111,4 @@ def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
             f"Message: {exc}"
         )
         logger.error(error_massage)
-        raise ErrorWithGoogleCloudAuthentication(exc)
+        raise ErrorWithGoogleCloudAuthentication(error_massage)
