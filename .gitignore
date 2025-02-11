@@ -93,4 +93,4 @@ fabric.properties
 
 .env
 .coverage
-credentials.json
+app/credentials.json
