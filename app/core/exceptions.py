@@ -17,12 +17,7 @@ class ErrorWithGoogleCloudAuthentication(Exception):
 
 
 class DoesNotHavePermissionForGoogleCloudSecret(Exception):
-    def __init__(self, exception: Forbidden):
-        message = (
-            f"Problem with permission for Google Cloud Secret. "
-            f"Trigger exception: {exception.__class__.__name__}.\n"
-            f"Message: {exception}"
-        )
+    def __init__(self, message: str):
         super().__init__(message)
 
 
