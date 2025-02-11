@@ -1,14 +1,19 @@
+import asyncio
 import logging
 import os
 from abc import ABC, abstractmethod
+from asyncio import EventLoop
 from typing import Union, TypeAlias, Optional
 
 from dotenv import load_dotenv
-from google.api_core.exceptions import NotFound
+from google.api_core.exceptions import NotFound, PermissionDenied, Forbidden
 from google.auth.exceptions import GoogleAuthError
 from google.cloud.secretmanager_v1 import SecretManagerServiceAsyncClient
 
-from app.core.exceptions import ErrorWithGoogleCloudAuthentication
+from app.core.exceptions import (
+    ErrorWithGoogleCloudAuthentication,
+    DoesNotHavePermission,
+)
 
 load_dotenv()
 
@@ -81,6 +86,14 @@ class SecretKeyGoogleCloud(SecretKeyBase):
                 request={"name": parent}
             )
             return secret_value.payload.data.decode("UTF-8")
+        except Forbidden as exc:
+            error_massage = (
+                f"Problem with permission for Google Cloud Secret. "
+                f"Trigger exception: {exc.__class__.__name__}.\n"
+                f"Message: {exc}"
+            )
+            logger.error(error_massage)
+            raise DoesNotHavePermission(exc)
 
         except (NotFound, AttributeError) as exc:
             error_massage = (
