@@ -120,7 +120,8 @@ def database_health_check(func: Callable) -> Callable:
             raise WrongDatabaseName(error_message)
         except ConnectionRefusedError as exc:
             error_message = (
-                f"Problem with connection to a remote computer. Trigger exception: "
+                f"Problem with connection to a remote computer. "
+                f"Trigger exception: "
                 f"{exc.__class__.__name__}.\n"
                 f"Message: {exc}"
             )
