@@ -1,9 +1,7 @@
 import functools
 import logging
 import socket
-import sys
 import time
-from collections import deque
 from typing import Callable, Any
 
 from asyncpg import (
