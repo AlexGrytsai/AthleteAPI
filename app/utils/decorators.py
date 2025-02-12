@@ -3,7 +3,9 @@ import logging
 import sys
 import time
 from collections import deque
-from typing import Callable
+from typing import Callable, Any
+
+from app.utils.memory_analysis import memory_report
 
 logger = logging.getLogger(__name__)
 
@@ -38,3 +40,15 @@ def sync_timer_of_execution(func: Callable) -> Callable:
         return result
 
     return wrapper
+
+
+def memory_profiler_class(cls: Any) -> None:
+    orig_init = cls.__init__
+
+    @functools.wraps(orig_init)
+    def new_init(self, *args, **kwargs) -> None:
+        orig_init(self, *args, **kwargs)
+        memory_report(self)
+
+    cls.__init__ = new_init
+    return cls
