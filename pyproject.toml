@@ -1,6 +1,9 @@
 [tool.black]
 line-length = 79
 
+[tool.mypy]
+ignore_missing_imports = true
+
 [tool.poetry]
 name = "Athleteapi"
 version = "0.1.0"
