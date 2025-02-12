@@ -7,7 +7,6 @@ from abc import ABC, abstractmethod
 
 from dotenv import load_dotenv
 
-from app.utils.decorators import memory_report, memory_profiler_class
 from app.utils.secret_key import (
     create_google_secret_client,
     SecretKeyGoogleCloud,
@@ -20,7 +19,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "False"
+DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "True"
 
 
 class DatabaseSettingsBase(ABC):
