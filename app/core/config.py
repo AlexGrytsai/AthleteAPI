@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 
 from dotenv import load_dotenv
 
+from app.utils.decorators import memory_report, memory_profiler_class
 from app.utils.secret_key import (
     create_google_secret_client,
     SecretKeyGoogleCloud,
@@ -19,7 +20,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "True"
+DEVELOP_MODE: bool = os.getenv("DEVELOP_MODE", "True") == "False"
 
 
 class DatabaseSettingsBase(ABC):
@@ -29,7 +30,10 @@ class DatabaseSettingsBase(ABC):
         pass
 
 
+@memory_profiler_class
 class DatabaseSettings(DatabaseSettingsBase):
+    __slots__ = ("database_scheme", "secret", "validator_parameters")
+
     def __init__(
         self,
         database_scheme: str,
@@ -63,6 +67,7 @@ class DatabaseSettings(DatabaseSettingsBase):
         )
 
 
+@memory_profiler_class
 class Settings:
     def __init__(self, db_settings: DatabaseSettingsBase) -> None:
         self._db_url = asyncio.run(db_settings.url)
