@@ -21,3 +21,7 @@ class WrongDatabaseName(Exception):
 class DatabaseConnectionErrorWrongHostOrPort(Exception):
     def __init__(self, message: str):
         super().__init__(message)
+
+class ProblemWithConnectionToDatabaseServer(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
