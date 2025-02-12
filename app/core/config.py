@@ -32,7 +32,7 @@ class DatabaseSettingsBase(ABC):
 
 @memory_profiler_class
 class DatabaseSettings(DatabaseSettingsBase):
-    __slots__ = ("database_scheme", "secret", "validator_parameters")
+    __slots__ = ("_database_scheme", "_secret", "_validator_parameters")
 
     def __init__(
         self,
@@ -40,9 +40,9 @@ class DatabaseSettings(DatabaseSettingsBase):
         secret: SecretKeyBase,
         validator_parameters: DataBaseParameterValidator,
     ) -> None:
-        self.database_scheme = database_scheme
-        self.secret = secret
-        self.validator_parameters = validator_parameters
+        self._database_scheme = database_scheme
+        self._secret = secret
+        self._validator_parameters = validator_parameters
 
     @property
     async def url(self) -> str:
@@ -55,14 +55,14 @@ class DatabaseSettings(DatabaseSettingsBase):
         )
 
         return (
-            f"{self.database_scheme}://"
+            f"{self._database_scheme}://"
             f"{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
         )
 
     async def _get_db_param(self, param: str, default: str) -> str:
-        secret_value = await self.secret.get_secret_key(param, default)
+        secret_value = await self._secret.get_secret_key(param, default)
 
-        return self.validator_parameters.validate_parameter_from_secret(
+        return self._validator_parameters.validate_parameter_from_secret(
             param=param, value=secret_value
         )
 
