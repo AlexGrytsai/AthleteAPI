@@ -3,10 +3,16 @@ from collections import deque
 from typing import Any
 
 
+import sys
+import inspect
+from collections import deque
+from typing import Any
+
+
 def memory_report(obj: Any) -> None:
     """
     Prints a memory report for the given object, including
-    the total memory used.
+    the total memory used and the module where the object is defined.
 
     Args:
         obj (Any): The object to generate a memory report for.
@@ -14,14 +20,17 @@ def memory_report(obj: Any) -> None:
     Returns:
         None
     """
+    # Получаем модуль, в котором объявлен объект
+    module = inspect.getmodule(obj)
+    module_name = module.__name__ if module else "Unknown module"
+
     # Create a set to keep track of objects that have already been processed
     seen = set()
     total_size = 0
-    # Create a queue to hold objects to be processed, with the given object
-    # as the first item
     queue = deque([(obj, "root")])
 
-    print("\n📊 Memory Report:")
+    print(f"\n📊 Memory Report for: {obj.__class__.__name__}")
+    print(f"📍 Module: {module_name}")
     print("-" * 50)
 
     while queue:
@@ -47,4 +56,5 @@ def memory_report(obj: Any) -> None:
                 queue.append((value, f"{path}[{key}]"))
 
     print("-" * 50)
-    print(f"🟢 Total Memory Used: {total_size} bytes\n")
+    print(f"🟢 Total Memory Used: {total_size}")
+    print("*" * 50)
