@@ -14,7 +14,7 @@ class TestSecretKeyGoogleCloud(unittest.TestCase):
         self.secret = SecretKeyGoogleCloud(client=self.mock_client)
 
     def test_init_success(self):
-        self.assertIsNotNone(self.secret.client)
+        self.assertIsNotNone(self.secret._client)
         self.mock_client.assert_not_called()
 
     @patch.dict(os.environ, {"GOOGLE_PROJECT_ID": "test"})
