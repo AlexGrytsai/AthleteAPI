@@ -88,44 +88,45 @@ async def is_connected_to_database(engine_instate: AsyncEngine) -> bool:
 
 
 def database_health_check(func: Callable) -> Callable:
+    critical_errors = {
+        socket.gaierror: (
+            DatabaseConnectionErrorWrongHostOrPort,
+            "Was provided invalid host or port",
+        ),
+        InvalidAuthorizationSpecificationError: (
+            InvalidUsernameOrPasswordForDatabase,
+            "Was provided invalid username or password",
+        ),
+        InvalidCatalogNameError: (
+            WrongDatabaseName,
+            "Was provided wrong database name",
+        ),
+        ConnectionRefusedError: (
+            ProblemWithConnectionToDatabaseServer,
+            "Problem with connection to a remote computer",
+        ),
+    }
+
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         try:
             engine = await func(*args, **kwargs)
             await is_connected_to_database(engine)
-        except socket.gaierror as exc:
-            error_message = (
-                f"Was provided invalid host or port "
-                f"for connection to Database. Trigger exception: "
-                f"{exc.__class__.__name__}.\n"
+            return engine
+        except tuple(critical_errors.keys()) as exc:
+            for base_exception in critical_errors:
+                if isinstance(exc, base_exception):
+                    error_class, message = critical_errors[base_exception]
+                    break
+            else:
+                error_class, message = Exception, "Unknown database error"
+            full_message = (
+                f"{message}. Trigger exception: {exc.__class__}.\n"
                 f"Message: {exc}"
             )
-            raise DatabaseConnectionErrorWrongHostOrPort(error_message)
-        except InvalidAuthorizationSpecificationError as exc:
-            error_message = (
-                f"Was provided invalid username or password "
-                f"for connection to Database. Trigger exception: "
-                f"{exc.__class__.__name__}.\n"
-                f"Message: {exc}"
-            )
-            logger.error(error_message)
-            raise InvalidUsernameOrPasswordForDatabase(error_message)
-        except InvalidCatalogNameError as exc:
-            error_message = (
-                f"Was provided wrong database name. Trigger exception: "
-                f"{exc.__class__.__name__}.\n"
-                f"Message: {exc}"
-            )
-            logger.error(error_message)
-            raise WrongDatabaseName(error_message)
-        except ConnectionRefusedError as exc:
-            error_message = (
-                f"Problem with connection to a remote computer. "
-                f"Trigger exception: "
-                f"{exc.__class__.__name__}.\n"
-                f"Message: {exc}"
-            )
-            logger.error(error_message)
-            raise ProblemWithConnectionToDatabaseServer(error_message)
+
+            logger.error(full_message)
+
+            raise error_class(full_message)
 
     return wrapper
