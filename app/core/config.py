@@ -65,7 +65,11 @@ class DatabaseSettings(DatabaseSettingsBase):
 
 class Settings:
     def __init__(self, db_settings: DatabaseSettingsBase) -> None:
-        self.db_url = asyncio.run(db_settings.url)
+        self._db_url = asyncio.run(db_settings.url)
+
+    @property
+    def database_url(self) -> str:
+        return self._db_url
 
 
 LOGGING_CONFIG = {
