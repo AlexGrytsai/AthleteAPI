@@ -30,7 +30,6 @@ class DatabaseSettingsBase(ABC):
         pass
 
 
-@memory_profiler_class
 class DatabaseSettings(DatabaseSettingsBase):
     __slots__ = ("_database_scheme", "_secret", "_validator_parameters")
 
@@ -67,7 +66,6 @@ class DatabaseSettings(DatabaseSettingsBase):
         )
 
 
-@memory_profiler_class
 class Settings:
     def __init__(self, db_settings: DatabaseSettingsBase) -> None:
         self._db_url = asyncio.run(db_settings.url)
