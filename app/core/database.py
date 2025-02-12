@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncEngine,
@@ -9,8 +7,6 @@ from sqlalchemy.ext.asyncio import (
 
 from app.core.config import settings
 from app.utils.decorators import database_health_check
-
-logger = logging.getLogger(__name__)
 
 
 @database_health_check
