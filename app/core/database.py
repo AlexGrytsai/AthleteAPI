@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 async def create_database_engine() -> AsyncEngine:
     try:
         engine = create_async_engine(
-            url=settings.db_url,
+            url=settings.database_url,
             echo=False,
             pool_size=5,
             max_overflow=10,
