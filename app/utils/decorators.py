@@ -61,7 +61,8 @@ def memory_profiler_class(cls: Any) -> None:
     @functools.wraps(orig_init)
     def new_init(self, *args, **kwargs) -> None:
         orig_init(self, *args, **kwargs)
-        memory_report(self)
+        if DEVELOP_MODE:
+            memory_report(self)
 
     cls.__init__ = new_init
     return cls
