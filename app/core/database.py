@@ -6,16 +6,16 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.config import settings
-from app.utils.decorators import database_health_check
 
 
-@database_health_check
 def create_database_engine(database_url: str) -> AsyncEngine:
     return create_async_engine(
         url=database_url,
         echo=False,
         pool_size=5,
         max_overflow=10,
+        pool_pre_ping=True,
+        pool_recycle=5,
     )
 
 
