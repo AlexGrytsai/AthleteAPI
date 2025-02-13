@@ -9,6 +9,11 @@ from app.core.config import settings
 
 
 def create_database_engine(database_url: str) -> AsyncEngine:
+    if database_url.startswith("sqlite+aiosqlite://"):
+        return create_async_engine(
+            url=database_url,
+            echo=False,
+        )
     return create_async_engine(
         url=database_url,
         echo=False,
