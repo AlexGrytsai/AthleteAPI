@@ -49,6 +49,11 @@ def memory_report(obj: Any) -> None:
             for key, value in current_obj.items():
                 queue.append((key, f"{path}.key({key})"))
                 queue.append((value, f"{path}[{key}]"))
+        elif hasattr(current_obj, "__slots__"):
+            for attr in current_obj.__slots__:
+                queue.append(
+                    (getattr(current_obj, attr, None), f"{path}.{attr}")
+                )
 
     print("-" * 50)
     print(f"🟢 Total Memory Used: {total_size}")
