@@ -94,3 +94,5 @@ fabric.properties
 .env
 .coverage
 app/credentials.json
+
+.qodo
