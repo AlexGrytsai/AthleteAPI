@@ -12,9 +12,7 @@ from app.core.database import create_database_engine, create_session_factory
 class TestDatabaseFunctions(unittest.IsolatedAsyncioTestCase):
     async def test_create_database_engine(self):
         database_url = "sqlite+aiosqlite:///:memory:"
-        print(f"Using database_url in test: {database_url}")
         engine = create_database_engine(database_url)
-        print(f"Using database_url in engine: {engine.url}")
 
         self.assertIsInstance(engine, AsyncEngine)
         self.assertEqual(str(engine.url), database_url)
