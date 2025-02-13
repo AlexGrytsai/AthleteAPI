@@ -11,7 +11,6 @@ from asyncpg import (
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from app.core.config import DEVELOP_MODE
 from app.core.exceptions import (
     DatabaseConnectionErrorWrongHostOrPort,
     InvalidUsernameOrPasswordForDatabase,
@@ -56,6 +55,8 @@ def sync_timer_of_execution(func: Callable) -> Callable:
 
 
 def memory_profiler_class(cls: Any) -> None:
+    from app.core.config import DEVELOP_MODE
+
     orig_init = cls.__init__
 
     @functools.wraps(orig_init)
@@ -69,6 +70,8 @@ def memory_profiler_class(cls: Any) -> None:
 
 
 def memory_profiler_func(func: Callable) -> Callable:
+    from app.core.config import DEVELOP_MODE
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
