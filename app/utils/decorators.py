@@ -1,22 +1,8 @@
 import functools
 import logging
-import socket
 import time
 from typing import Callable, Any
 
-from asyncpg import (
-    InvalidAuthorizationSpecificationError,
-    InvalidCatalogNameError,
-)
-from sqlalchemy.exc import DatabaseError
-from sqlalchemy.ext.asyncio import AsyncEngine
-
-from app.core.exceptions import (
-    DatabaseConnectionErrorWrongHostOrPort,
-    InvalidUsernameOrPasswordForDatabase,
-    WrongDatabaseName,
-    ProblemWithConnectionToDatabaseServer,
-)
 from app.utils.memory_analysis import memory_report
 
 logger = logging.getLogger(__name__)
@@ -79,58 +65,5 @@ def memory_profiler_func(func: Callable) -> Callable:
             print(f"\n🔍 Analyzing memory for function: {func.__name__}")
             memory_report(result)
         return result
-
-    return wrapper
-
-
-async def is_connected_to_database(engine_instate: AsyncEngine) -> bool:
-    try:
-        async with engine_instate.connect():
-            return True
-    except DatabaseError:
-        return False
-
-
-def database_health_check(func: Callable) -> Callable:
-    critical_errors = {
-        socket.gaierror: (
-            DatabaseConnectionErrorWrongHostOrPort,
-            "Was provided invalid host or port",
-        ),
-        InvalidAuthorizationSpecificationError: (
-            InvalidUsernameOrPasswordForDatabase,
-            "Was provided invalid username or password",
-        ),
-        InvalidCatalogNameError: (
-            WrongDatabaseName,
-            "Was provided wrong database name",
-        ),
-        ConnectionRefusedError: (
-            ProblemWithConnectionToDatabaseServer,
-            "Problem with connection to a remote computer",
-        ),
-    }
-
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
-        try:
-            engine = await func(*args, **kwargs)
-            await is_connected_to_database(engine)
-            return engine
-        except tuple(critical_errors.keys()) as exc:
-            for base_exception in critical_errors:
-                if isinstance(exc, base_exception):
-                    error_class, message = critical_errors[base_exception]
-                    break
-            else:
-                error_class, message = Exception, "Unknown database error"
-            full_message = (
-                f"{message}. Trigger exception: {exc.__class__}.\n"
-                f"Message: {exc}"
-            )
-
-            logger.error(full_message)
-
-            raise error_class(full_message)
 
     return wrapper
