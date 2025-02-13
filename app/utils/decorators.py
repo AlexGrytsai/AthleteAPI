@@ -11,6 +11,7 @@ from asyncpg import (
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from app.core.config import DEVELOP_MODE
 from app.core.exceptions import (
     DatabaseConnectionErrorWrongHostOrPort,
     InvalidUsernameOrPasswordForDatabase,
@@ -70,8 +71,9 @@ def memory_profiler_func(func: Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
-        print(f"\n🔍 Analyzing memory for function: {func.__name__}")
-        memory_report(result)
+        if DEVELOP_MODE:
+            print(f"\n🔍 Analyzing memory for function: {func.__name__}")
+            memory_report(result)
         return result
 
     return wrapper
