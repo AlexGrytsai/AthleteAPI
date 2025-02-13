@@ -14,6 +14,7 @@ from app.core.exceptions import (
     ErrorWithGoogleCloudAuthentication,
     DoesNotHavePermissionForGoogleCloudSecret,
 )
+from app.utils.decorators import memory_profiler_class
 
 load_dotenv()
 
@@ -58,15 +59,17 @@ class SecretKeyGoogleCloud(SecretKeyBase):
     Secret Manager.
     """
 
+    __slots__ = ("_client",)
+
     def __init__(self, client: Optional[SecretManagerServiceClient]):
-        self.client = client
+        self._client = client
 
     async def get_secret_key(
         self,
         secret_key: str,
         default_value: str,
     ) -> str:
-        if not self.client:
+        if not self._client:
             return default_value
 
         try:
@@ -77,7 +80,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
                 f"{secret_key}/versions/latest"
             )
 
-            secret_value = self.client.access_secret_version(
+            secret_value = self._client.access_secret_version(
                 request={"name": parent}
             )
             return str(secret_value.payload.data.decode("UTF-8"))
@@ -88,7 +91,7 @@ class SecretKeyGoogleCloud(SecretKeyBase):
                 f"Message: {exc}"
             )
             logger.error(error_massage)
-            raise DoesNotHavePermissionForGoogleCloudSecret(exc)
+            raise DoesNotHavePermissionForGoogleCloudSecret(error_massage)
 
         except (NotFound, AttributeError) as exc:
             error_massage = (
@@ -102,7 +105,6 @@ class SecretKeyGoogleCloud(SecretKeyBase):
 
 def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
     try:
-        # return SecretManagerServiceAsyncClient()
         return SecretManagerServiceClient()
     except GoogleAuthError as exc:
         error_massage = (
@@ -111,4 +113,4 @@ def create_google_secret_client() -> Optional[SecretManagerServiceClient]:
             f"Message: {exc}"
         )
         logger.error(error_massage)
-        raise ErrorWithGoogleCloudAuthentication(exc)
+        raise ErrorWithGoogleCloudAuthentication(error_massage)
