@@ -1,6 +1,9 @@
 [tool.black]
 line-length = 79
 
+[tool.mypy]
+ignore_missing_imports = true
+
 [tool.poetry]
 name = "Athleteapi"
 version = "0.1.0"
@@ -12,12 +15,19 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.13"
 python-dotenv = "^1.0.1"
+google-cloud-secret-manager = "^2.22.1"
+asyncpg = "^0.30.0"
+sqlalchemy = {extras = ["all"], version = "^2.0.38"}
+alembic = "^1.14.1"
+psycopg2 = "^2.9.10"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
 flake8 = "^7.1.1"
 mypy = "^1.15.0"
+coverage = "^7.6.11"
+aiosqlite = "^0.21.0"
 
 [build-system]
 requires = ["poetry-core"]
