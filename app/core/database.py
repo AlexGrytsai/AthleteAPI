@@ -5,8 +5,6 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from app.core.config import settings
-
 
 def create_database_engine(database_url: str) -> AsyncEngine:
     if database_url.startswith("sqlite+aiosqlite://"):
@@ -28,7 +26,3 @@ def create_session_factory(
     async_engine: AsyncEngine,
 ) -> async_sessionmaker[AsyncSession]:
     return async_sessionmaker(bind=async_engine)
-
-
-engine = create_database_engine(settings.database_url)
-session_factory = create_session_factory(engine)
