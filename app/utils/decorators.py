@@ -41,14 +41,14 @@ def sync_timer_of_execution(func: Callable) -> Callable:
 
 
 def memory_profiler_class(cls: Any) -> None:
-    from app.core.config import DEVELOP_MODE
+    from app.core.config import DEVELOP_MODE, PROFILER_MODE
 
     orig_init = cls.__init__
 
     @functools.wraps(orig_init)
     def new_init(self, *args, **kwargs) -> None:
         orig_init(self, *args, **kwargs)
-        if DEVELOP_MODE:
+        if DEVELOP_MODE and PROFILER_MODE:
             memory_report(self)
 
     cls.__init__ = new_init
@@ -56,12 +56,12 @@ def memory_profiler_class(cls: Any) -> None:
 
 
 def memory_profiler_func(func: Callable) -> Callable:
-    from app.core.config import DEVELOP_MODE
+    from app.core.config import DEVELOP_MODE, PROFILER_MODE
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
-        if DEVELOP_MODE:
+        if DEVELOP_MODE and PROFILER_MODE:
             print(f"\n🔍 Analyzing memory for function: {func.__name__}")
             memory_report(result)
         return result
